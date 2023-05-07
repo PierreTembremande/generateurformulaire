@@ -1,5 +1,19 @@
 import logo from './logo.svg';
 import './App.css';
+import caractaristique from "./routes/CaracteristiquesFormulaire";
+import {
+  createBrowserRouter,
+  RouterProvider,
+} from "react-router-dom";
+
+
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <caractaristique />
+  }
+]);
+
 
 function App() {
   return (
