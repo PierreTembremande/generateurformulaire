@@ -2,7 +2,7 @@ import React, { useState } from "react";
 let contientToutChamp = [];
 let recup = [];
 let tableauErreur = [];
-const regex = /[123456789]/
+let tableauErreurNumber = [];
 let erreurAlpha = false;
 let erreurChampRequis = false;
 
@@ -20,14 +20,16 @@ export default function CreationFormulaire(information) {
                 "required": true,
                 "label": "Prénom",
                 "type": "text",
-                "visibility": null
+                "visibility": null,
+                "defaultValue": ""
             },
             {
                 "id": "age",
                 "required": false,
                 "label": "Age",
                 "type": "number",
-                "visibility": "firstname=John"
+                "visibility": "firstname=John",
+                "defaultValue": 18
             }
         ]
     },
@@ -41,28 +43,32 @@ export default function CreationFormulaire(information) {
                 "label": "Choisi ton destin",
                 "type": "select",
                 "option": ["Noé", "Théo", "Allan", "Philippe"],
-                "visibility": null
+                "visibility": null,
+                "defaultValue": ""
             },
             {
                 "id": "check",
                 "required": true,
                 "label": "vie",
                 "type": "checkbox",
-                "visibility": null
+                "visibility": null,
+                "defaultValue": ""
             },
             {
                 "id": "ecouteça",
                 "required": true,
                 "label": "mort",
                 "type": "radio",
-                "visibility": null
+                "visibility": null,
+                "defaultValue": ""
             },
             {
                 "id": "comment",
                 "required": true,
                 "label": "explication",
                 "type": "textarea",
-                "visibility": null
+                "visibility": null,
+                "defaultValue": ""
             }
         ]
     }]
@@ -71,10 +77,18 @@ export default function CreationFormulaire(information) {
 
         let contientChamp = [];
 
-        if (donnee.type === "text" || donnee.type === "number" || donnee.type === "radio" || donnee.type === "checkbox") {
+        if (donnee.type === "text" || donnee.type === "radio" || donnee.type === "checkbox") {
             contientChamp.push(<div key={"input" & donnee.id} hidden={visible(donnee.visibility, donnee.id + i)} id={donnee.id + i}>
                 <label key={"label" + i} id={"label" + donnee.id}>{donnee.label}</label>
                 <input id={donnee.id} type={donnee.type} required={donnee.required} onChange={({ target: { value } }) => { visible2(value, donnee.id) }} ></input>
+                <p id={"valeurVide" + donnee.id} hidden={true} >Ce champ est requis</p>
+            </div>);
+        }
+
+        if (donnee.type === "number") {
+            contientChamp.push(<div key={"input" & donnee.id} hidden={visible(donnee.visibility, donnee.id + i)} id={donnee.id + i}>
+                <label key={"label" + i} id={"label" + donnee.id}>{donnee.label}</label>
+                <input id={donnee.id} type={donnee.type} required={donnee.required} onChange={({ target: { value } }) => { visible2(value, donnee.id) }} onKeyPress={(event) => { if (!/[0-9]/.test(event.key)) { tableauErreurNumber.push(<p key={i}>{"Le champ " + document.getElementById("label" + donnee.id).textContent + " contient des caractères alphanumériques. Veillez y remédier"}</p>); } }} ></input>
                 <p id={"valeurVide" + donnee.id} hidden={true} >Ce champ est requis</p>
             </div>);
         }
@@ -108,6 +122,10 @@ export default function CreationFormulaire(information) {
         contientToutChamp = contientToutChamp.filter((x, i) => contientToutChamp.indexOf(x) === i);
 
         return contientChamp;
+    }
+
+    function attributionValeurDefaut(entree) {
+
     }
 
     function visible(visibility, id) {
@@ -197,14 +215,15 @@ export default function CreationFormulaire(information) {
     }
 
     function verificationErreur() {
+
         tableauErreur = [];
+
+        if (tableauErreurNumber.length > 0) {
+            tableauErreur = tableauErreurNumber;
+        }
+
         for (let i = 0; i < contientToutChamp.length; i++) {
             let id = contientToutChamp[i].split(",");
-            console.log(document.getElementById(id[0]).length);
-            if (document.getElementById(id[0]).type === "number" && !regex.test(document.getElementById(id[0]).value) && document.getElementById(id[0]).innerHTML.length !== 0) {
-                tableauErreur.push(<p key={i}>{"Le champ " + document.getElementById("label" + id[0]).textContent + " contient des caractères alphanumériques. Veillez y remédier"}</p>);
-                erreurAlpha = true;
-            }
 
             if (!document.getElementById("valeurVide" + id[0]).hidden) {
                 if (document.getElementById(id[0]).type === "checkbox" || document.getElementById(id[0]).type === "radio") {
@@ -222,9 +241,26 @@ export default function CreationFormulaire(information) {
             SetErreur(false);
         }
 
+        if (tableauErreur.length === 0) {
+
+            let logResultat = {};
+
+            for (let i = 0; i < contientToutChamp.length; i++) {
+
+                let id = contientToutChamp[i].split(",");
+                let cles = document.getElementById("label" + id[0]).textContent
+                logResultat[cles] = document.getElementById(id[0]).value;
+
+            }
+
+            console.log(JSON.parse(JSON.stringify(logResultat)));
+
+        }
+
         SetAffichageErreur(tableauErreur);
         erreurAlpha = false;
         erreurChampRequis = false;
+        tableauErreurNumber = [];
     }
 
     function regroupe() {
@@ -248,6 +284,7 @@ export default function CreationFormulaire(information) {
                                 donnee.inputs.map((entree, j) => (
                                     <div key={j}>
                                         {gestionChamp(entree, i)}
+                                        {attributionValeurDefaut(entree)}
                                     </div>
                                 ))
                             }
