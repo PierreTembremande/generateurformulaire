@@ -1,3 +1,25 @@
-.longChamp {
-    object-fit: scale-down;
+.DivErreur {
+    position: absolute;
+    border: 1px outset;
+}
+
+h1 {
+    background-color: cornflowerblue;
+    width: 400px;
+    margin: auto;
+}
+
+.corp {
+    background-color: aquamarine;
+    width: 400px;
+    height: fit-content;
+    margin: auto;
+}
+
+span {
+    color: red;
+}
+
+label {
+    font-weight: 600;
 }

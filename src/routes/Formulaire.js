@@ -1,4 +1,7 @@
 import React, { useState } from "react";
+import Button from 'react-bootstrap/Button';
+import './Visuel/MisEnForme.css'
+
 let contientToutChamp = [];
 let recup = [];
 let tableauErreur = [];
@@ -10,6 +13,9 @@ export default function CreationFormulaire(information) {
 
     const [erreur, SetErreur] = useState(false);
     const [affichageErreur, SetAffichageErreur] = useState([]);
+
+    // Ici formation est initialisé du au manque de temps.
+    // Autrement, information est l'objet JSON passé par le client
 
     information = [{
         "id": "customer",
@@ -40,16 +46,16 @@ export default function CreationFormulaire(information) {
             {
                 "id": "listeDeroulanteTest",
                 "required": true,
-                "label": "Choisi ton destin",
+                "label": "Choix accompagnant",
                 "type": "select",
-                "option": ["Noé", "Théo", "Allan", "Philippe"],
+                "option": ["Noé", "Théo", "Allan", "Geoffrey"],
                 "visibility": null,
                 "defaultValue": ""
             },
             {
                 "id": "check",
                 "required": true,
-                "label": "vie",
+                "label": "je valide",
                 "type": "checkbox",
                 "visibility": null,
                 "defaultValue": ""
@@ -57,7 +63,7 @@ export default function CreationFormulaire(information) {
             {
                 "id": "ecouteça",
                 "required": true,
-                "label": "mort",
+                "label": "j'approuve",
                 "type": "radio",
                 "visibility": null,
                 "defaultValue": ""
@@ -65,7 +71,7 @@ export default function CreationFormulaire(information) {
             {
                 "id": "comment",
                 "required": true,
-                "label": "explication",
+                "label": "commentaire",
                 "type": "textarea",
                 "visibility": null,
                 "defaultValue": ""
@@ -80,7 +86,8 @@ export default function CreationFormulaire(information) {
         if (donnee.type === "text" || donnee.type === "radio" || donnee.type === "checkbox") {
             contientChamp.push(<div key={"input" & donnee.id} hidden={visible(donnee.visibility, donnee.id + i)} id={donnee.id + i}>
                 <label key={"label" + i} id={"label" + donnee.id}>{donnee.label}</label>
-                <input id={donnee.id} type={donnee.type} required={donnee.required} onChange={({ target: { value } }) => { visible2(value, donnee.id) }} ></input>
+                <input id={donnee.id} type={donnee.type} required={donnee.required} onChange={({ target: { value } }) => { EtatVisibiliteChamp(value, donnee.id) }}></input>
+                {donnee.required && <span>*</span>}
                 <p id={"valeurVide" + donnee.id} hidden={true} >Ce champ est requis</p>
             </div>);
         }
@@ -88,7 +95,8 @@ export default function CreationFormulaire(information) {
         if (donnee.type === "number") {
             contientChamp.push(<div key={"input" & donnee.id} hidden={visible(donnee.visibility, donnee.id + i)} id={donnee.id + i}>
                 <label key={"label" + i} id={"label" + donnee.id}>{donnee.label}</label>
-                <input id={donnee.id} type={donnee.type} required={donnee.required} onChange={({ target: { value } }) => { visible2(value, donnee.id) }} onKeyPress={(event) => { if (!/[0-9]/.test(event.key)) { tableauErreurNumber.push(<p key={i}>{"Le champ " + document.getElementById("label" + donnee.id).textContent + " contient des caractères alphanumériques. Veillez y remédier"}</p>); } }} ></input>
+                <input id={donnee.id} type={donnee.type} required={donnee.required} onChange={({ target: { value } }) => { EtatVisibiliteChamp(value, donnee.id) }} onKeyPress={(event) => { if (!/[0-9]/.test(event.key)) { tableauErreurNumber.push(<p key={i}>{"Le champ " + document.getElementById("label" + donnee.id).textContent + " contient des caractères alphanumériques. Veillez y remédier"}</p>); } }}></input>
+                {donnee.required && <span>*</span>}
                 <p id={"valeurVide" + donnee.id} hidden={true} >Ce champ est requis</p>
             </div>);
         }
@@ -96,13 +104,14 @@ export default function CreationFormulaire(information) {
         if (donnee.type === "select") {
             contientChamp.push(<div key={"select" & donnee.id} hidden={visible(donnee.visibility, donnee.id + i)} id={donnee.id + i}>
                 <label key={"label" + i} id={"label" + donnee.id}>{donnee.label}</label>
-                <select id={donnee.id} onChange={({ target: { value } }) => { visible2(value, donnee.id) }}>
+                <select id={donnee.id} onChange={({ target: { value } }) => { EtatVisibiliteChamp(value, donnee.id) }}>
                     {donnee.option.map((contenu, i) => {
                         return (
                             <option key={i} value={contenu}>{contenu}</option>
                         )
                     })}
                 </ select>
+                {donnee.required && <span>*</span>}
                 <p id={"valeurVide" + donnee.id} hidden={true} >Ce champ est requis</p>
             </div>)
         }
@@ -110,7 +119,8 @@ export default function CreationFormulaire(information) {
         if (donnee.type === "textarea") {
             contientChamp.push(<div key={"textarea" & donnee.id} hidden={visible(donnee.visibility, donnee.id + i)} id={donnee.id + i}>
                 <label key={"label" + i} id={"label" + donnee.id}>{donnee.label}</label>
-                <textarea id={donnee.id} required={donnee.required} onChange={({ target: { value } }) => { visible2(value, donnee.id) }}></textarea>
+                <textarea id={donnee.id} required={donnee.required} onChange={({ target: { value } }) => { EtatVisibiliteChamp(value, donnee.id) }}></textarea>
+                {donnee.required && <span>*</span>}
                 <p id={"valeurVide" + donnee.id} hidden={true} >Ce champ est requis</p>
             </div>);
         }
@@ -124,9 +134,21 @@ export default function CreationFormulaire(information) {
         return contientChamp;
     }
 
-    function attributionValeurDefaut(entree) {
+    // Tentative d'implémentation de la valeur par défaut
+    // function attributionValeurDefaut(entree) {
+    //     for (let i = 0; i < contientToutChamp.length; i++) {
+    //         try {
+    //             if (entree.defaultValue !== "") {
+    //                 console.log(entree.defaultValue)
+    //                 document.getElementById(entree.id).value = entree.defaultValue;
+    //             }
+    //         } catch (error) {
 
-    }
+    //         }
+
+    //     }
+
+    // }
 
     function visible(visibility, id) {
 
@@ -142,7 +164,7 @@ export default function CreationFormulaire(information) {
         return v;
     }
 
-    function visible2(valeur, id) {
+    function EtatVisibiliteChamp(valeur, id) {
         let verif;
         for (let i = 0; i < recup.length; i++) {
             let sansId = recup[i].split("/");
@@ -253,7 +275,7 @@ export default function CreationFormulaire(information) {
 
             }
 
-            console.log(JSON.parse(JSON.stringify(logResultat)));
+            console.log((logResultat));
 
         }
 
@@ -270,7 +292,7 @@ export default function CreationFormulaire(information) {
 
     return (
         <>
-            {erreur && <div>
+            {erreur && <div className="DivErreur">
                 <h3>Résumé des erreurs</h3>
                 {affichageErreur.map((uneErreur) => (uneErreur))}
             </div>}
@@ -278,13 +300,13 @@ export default function CreationFormulaire(information) {
             {information.length ?
                 (
                     information.map((donnee, i) => (
-                        < div key={i} >
+                        < div key={i} className="corp">
                             <h1 id={donnee.id}>{donnee.title}</h1>
                             {
                                 donnee.inputs.map((entree, j) => (
                                     <div key={j}>
                                         {gestionChamp(entree, i)}
-                                        {attributionValeurDefaut(entree)}
+                                        {/* {attributionValeurDefaut(entree)} */}
                                     </div>
                                 ))
                             }
@@ -292,7 +314,7 @@ export default function CreationFormulaire(information) {
                     ))
                 ) : (<p>loading...</p>)
             }
-            <button onClick={regroupe}>Soumettre</button >
+            <Button onClick={regroupe}>Soumettre</Button >
         </>
     );
 }

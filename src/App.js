@@ -1,5 +1,4 @@
 import './App.css';
-import Caracteristique from "./routes/CaracteristiquesFormulaire";
 import Formulaire from "./routes/Formulaire";
 import {
   createBrowserRouter,
@@ -10,9 +9,6 @@ import {
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <Caracteristique />
-  }, {
-    path: "/form",
     element: <Formulaire />
   }
 ]);
