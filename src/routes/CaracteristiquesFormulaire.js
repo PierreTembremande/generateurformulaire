@@ -1,3 +1,6 @@
+// Ce fichier est une ébauche de la construction du fichier JSON par le client
+// Il est inachevé mais peut toujours être intéressant
+
 import React, { useState } from "react";
 let newt = [];
 
